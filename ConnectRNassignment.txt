@@ -1,0 +1,206 @@
+
+Project 1
+
+const express = require ('express');
+const bodyParser = require('body-parser');
+const PORT = parseInt(process.env.PORT,10) || 5001;
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+/* curl -X POST -H "accept: application/json" -d "[{\"user_id\": 1,\"name\": \"Joe Smith\",\"date_of_birth\": \"1983-05-12\",\"created_on\": 1642612034},{\"user_id\": 2,\"name\": \"Jane Doe\",\"date_of_birth\": \"1990-08-06\",\"created_on\": 1642612034}]" http://localhost:5001/jsonendpoint
+*/
+app.post('/jsonendpoint', (req, res, next)=>{
+    
+    const objectbody = Object.keys(req.body)
+   // return res.send(Object.values(objectbody));
+    // return res.send(objectbody[0]);
+    arraybody = objectbody[0];
+    JSON.parse(arraybody);
+    // arraybody is [{"user_id": 1,"name": "Joe Smith","date_of_birth": "1983-05-12","created_on": 1642612034},{"user_id": 2,"name": "Jane Doe","date_of_birth": "1990-08-06","created_on": 1642612034}]
+   
+
+    arraybody.map(({user_id, name, date_of_birth,created_on})=>{ 
+
+      return {user_id, name, date_of_birth.getDay(), new Date(created_on).toISOString() };
+
+   });
+
+    res.status(200).send(arraybody);
+
+});
+
+app.listen(5001, function(){
+    console.log('Server listing')
+})
+
+
+Unit Test
+
+let chai = require('chai');
+let chttp = require('chai-http');
+let app = require('../app')
+let should = chai.should();
+
+chai.use(chttp);
+describe('JSON', () =>{
+  describe('/jsonendpoint' () => {
+      it('it should accept JSON and generate a new JSON response'), done => {
+         const 
+  payload = 
+   [
+{
+"user_id": 1,
+"name": "Joe Smith",
+"date_of_birth": "1983-05-12",
+"created_on": 1642612034
+},
+{
+"user_id": 2,
+"name": "Jane Doe",
+"date_of_birth": "1990-08-06",
+"created_on": 1642612034
+}
+]
+
+          chai.request(app)
+              .post('/jsonendpoint')
+              .send(payload)
+              .end((err, res) => {
+               res.should.have.status(200);
+               done();
+            });
+      });
+  });
+});
+
+
+Project 2
+
+
+
+const express = require ('express');
+const bodyParser = require('body-parser');
+const PORT = parseInt(process.env.PORT,10) || 5001;
+const app = express();
+const Jimp = require("jimp");
+const multer = require('multer');
+const upload = multer({dest: __dirname + '/uploads/images'});
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+/* curl -X POST -H "accept: application/json" -d "[{\"user_id\": 1,\"name\": \"Joe Smith\",\"date_of_birth\": \"1983-05-12\",\"created_on\": 1642612034},{\"user_id\": 2,\"name\": \"Jane Doe\",\"date_of_birth\": \"1990-08-06\",\"created_on\": 1642612034}]" http://localhost:5001/jsonendpoint
+*/
+app.post('/upload', upload.single('photo'), (req, res, next)=>{
+  filename = req.file
+    
+  Jimp.read("uploads/images/" + filename, function (err, image) {
+     if (err) {
+         console.log(err)         
+     } 
+     else {
+         image
+            .resize(256, Jimp.AUTO)
+            .write("uploads/images/output.png")
+    }
+  
+})
+   res.status(200).send('File converted to .png correctly');
+
+});
+
+Unit Test
+
+let chai = require('chai');
+let chttp = require('chai-http');
+let app = require('../app')
+let should = chai.should();
+
+chai.use(chttp);
+file = {fileName: "input.png"}
+describe('Image', () =>{
+  describe('/POST' () => {
+      it('it should convert the uploaded .jpg file to .png'), done => {
+          chai.request(app)
+            .post('/upload')
+            .attach('files', "uploads/images/input.png")
+            .send(file)
+            .end((err, res) => {
+               res.should.have.status(200);
+               done();
+            });
+      });
+  });
+});
+
+Dockerfile to create image
+
+FROM node:10-alpine
+
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+
+WORKDIR /home/node/app
+
+COPY package*.json ./
+
+USER node
+
+RUN npm install
+
+COPY --chown=node:node . .
+
+EXPOSE 8080
+
+CMD [ "node", "app.js" ]
+
+Create a .dockerignore file - put the following in it
+
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+
+Use the docker build command to create an image in Docker hub
+
+docker build -t <dockerhub_username>/nodejs-image_post .
+
+
+Project 3
+
+CREATE TABLE UserInfo (
+    UserId integer NOT NULL,
+    FirstName varchar(255),
+    LastName varchar(255),
+    City varchar,
+    ZipCode integer,
+    PRIMARY KEY(UserId)
+);
+
+CREATE TABLE UserPasswordHistory (
+    Password varchar(25) NOT NULL,
+    ChangeDate date,
+    CurrentlyActive boolean,
+    UserId integer NOT NULL,
+    PRIMARY KEY(Password),
+    FOREIGN KEY(UserId) 
+    REFERENCES ChildTable (UserId) ON DELETE CASCADE  
+);
+
+Select Password from UserPasswordHistory where CurrentlyActive=true;
+
+INSERT INTO UserPasswordHistory VALUES ("mypassword","2022-11-24",true,54321);
+
+
+;with cte as (
+SELECT
+    Password 
+    , LAG(CurrentlyActive) OVER (ORDER by Password) as PreviousActive
+FROM UserPasswordHistory
+)
+UPDATE cte
+SET PreviousActive = NULL When PrevousActive = true
+
+
+
