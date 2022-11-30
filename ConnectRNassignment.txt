@@ -193,7 +193,7 @@ Select Password from UserPasswordHistory where CurrentlyActive=true;
 INSERT INTO UserPasswordHistory VALUES ("mypassword","2022-11-24",true,54321);
 
 
-;with cte as (
+WITH cte as (
 SELECT
     Password 
     , LAG(CurrentlyActive) OVER (ORDER by Password) as PreviousActive
