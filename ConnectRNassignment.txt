@@ -28,7 +28,7 @@ app.post('/jsonendpoint', (req, res, next)=>{
 
    });
 
-    res.status(200).send(arraybody);
+    res.status(200).json(arraybody);
 
 });
 
