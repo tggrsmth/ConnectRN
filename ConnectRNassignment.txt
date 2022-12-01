@@ -1,6 +1,7 @@
 
 Project 1
 
+const moment = require('moment');
 const express = require ('express');
 const bodyParser = require('body-parser');
 const PORT = parseInt(process.env.PORT,10) || 5001;
@@ -23,7 +24,7 @@ app.post('/jsonendpoint', (req, res, next)=>{
 
     arraybody.map(({user_id, name, date_of_birth,created_on})=>{ 
 
-      return {user_id, name, date_of_birth.getDay(), new Date(created_on).toISOString() };
+      return {user_id, name, date_of_birth.getDay(), moment(created_on).subtract(5, 'hours').format('YYYY-MM-DDThh:mm:ss') };
 
    });
 
