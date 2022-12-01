@@ -33,7 +33,7 @@ app.post('/jsonendpoint', (req, res, next)=>{
 });
 
 app.listen(5001, function(){
-    console.log('Server listing')
+console.log('Server listening')
 })
 
 
@@ -111,6 +111,10 @@ app.post('/upload', upload.single('photo'), (req, res, next)=>{
    res.status(200).send('File converted to .png correctly');
 
 });
+app.listen(5001, function(){
+console.log('Server listening')
+})
+
 
 Unit Test
 
